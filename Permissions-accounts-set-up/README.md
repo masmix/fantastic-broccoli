@@ -13,7 +13,7 @@ Example URL
 https://d-93677b80d9.awsapps.com/start#/
 ```
 
-# Configuration steps
+# 1. Configuration steps
 - get programatic acess keys from Dev-source account 
 ![](../../images/AWS-SSO-Dashboard.png)
 
@@ -22,7 +22,7 @@ https://d-93677b80d9.awsapps.com/start#/
 - copy data to clipboard from point 2 
 
 ```console
-[dev]
+[developer1]
 aws_access_key_id=xxxx
 aws_secret_access_key=xxxx
 aws_session_token=xxxx
@@ -31,10 +31,17 @@ aws_session_token=xxxx
 - paste into .aws/credentials
 
 ```console
-[dev]
+[developer1]
 aws_access_key_id=xxx
 aws_secret_access_key=xxx
 aws_session_token=xxx
+```
+
+- paste into ~.aws/config
+```console
+[profile developer]
+region = eu-west-1
+output = json
 ```
 
 - verify identity
@@ -51,7 +58,7 @@ aws iam create-policy --policy-name aws-refarch-cross-account-pipeline-sts-and-c
 ```
 - attach policy to user
 ```sh
-aws iam attach-user-policy --user-name admin  --policy-arn "arn:aws:iam::{tools_account_id}:policy/aws-refarch-cross-account-pipeline-sts-and-cloudformation-policy" --profile developer1
+aws iam attach-user-policy --user-name pulumi --policy-arn "arn:aws:iam::{aws_account_id}:policy/aws-refarch-cross-account-pipeline-sts-and-cloudformation-policy" --profile developer1
 ```
 - create IAM role
 ```sh
@@ -59,7 +66,7 @@ aws iam create-role --role-name aws-refarch-cross-account-pipeline-service-role 
 ```
 - attach policy to role
 ```sh
-aws iam attach-role-policy --role-name aws-refarch-cross-account-pipeline-service-role --policy-arn "arn:aws:iam::374925447540:policy/aws-refarch-cross-account-pipeline-sts-and-cloudformation-policy" --profile developer1
+aws iam attach-role-policy --role-name aws-refarch-cross-account-pipeline-service-role --policy-arn "arn:aws:iam::{aws_account_id}:policy/aws-refarch-cross-account-pipeline-sts-and-cloudformation-policy" --profile developer1
 ```
 - verify 
 ```sh
@@ -67,11 +74,11 @@ aws iam list-attached-role-policies --role-name aws-refarch-cross-account-pipeli
 ```
 - create user credentials
 ```sh
-aws iam create-access-key --user-name admin --profile tools_admin
+aws iam create-access-key --user-name pulumi --profile developer1
 ```
-- confi
+- configure default profile 
 ```sh
-aws configure
+aws configure 
 AWS Access Key ID [None]: ExampleAccessKeyID1
 AWS Secret Access Key [None]: ExampleSecretKey1
 Default region name [None]: eu-west-1
@@ -79,8 +86,19 @@ Default output format [None]: json
 ```
 - verify
 ```sh
-aws sts get-caller-identity --profile aleph_tools_admin
+aws sts get-caller-identity
 ```
+Expected output:
+```json
+{
+    "UserId": "AIDA2UAQ2YM2ZZ4NNGFPX",
+    "Account": "730179748661",
+    "Arn": "arn:aws:iam::730179748661:user/pulumi"
+}
+```
+
+# 2. Role assume configuration (optional)
+
 - asume role
 ```sh
 aws sts assume-role --role-arn "arn:aws:iam::{YOUR_TOOLS_ACCOUNT_ID}:role/aws-refarch-cross-account-pipeline-service-role-2" --role-session-name AWSCLI-Session --profile tools_admin
@@ -112,7 +130,9 @@ Example output
 ```
 # Finish
 
-tools_admin_deployer name should be used as profile name for [main script](../../single-click-cross-account-pipeline.sh) 
+From now default aws profile for cli should works. 
+
+You can continue with next [steps](../README.md)
 
 # References
 
