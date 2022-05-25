@@ -74,7 +74,26 @@ pulumi up
 
 Output:
 ```console
+Previewing update (pulumister)
 
+View Live: https://app.pulumi.com/masmix/quickstart/pulumister/previews/0823ea85-f858-4bb9-bf6a-65210a78c220
+
+     Type                 Name                   Plan       Info
+ +   pulumi:pulumi:Stack  quickstart-pulumister  create     1 message
+ +   └─ aws:s3:Bucket     my-bucket              create
+
+Outputs:
+  + bucket_name: output<string>
+
+Resources:
+    + 1 to create
+    1 unchanged
+
+Do you want to perform this update? yes
+Updating (dev)
+```
+
+# Deploy the Stack 
 
 
 
@@ -94,8 +113,20 @@ Solution:
 
 - update [policy](Permissions-accounts-set-up/tools-admin-user-policy.json) with desired or missing permissions
 
+i.e
+```sh
+...
+"iam:AttachRolePolicy",
+...
+```
+
 - update policy 
 
 ```sh
-aws iam create-policy-version  --policy-arn arn:aws:iam::730179748661:policy/aws-refarch-cross-account-pipeline-sts-and-cloudformation-policy  --policy-document file://Permissions-accounts-set-up/tools-admin-user-policy.json --profile developer1  --set-as-default
+aws iam create-policy-version  --policy-arn arn:aws:iam::{$ACCOUNT_ID}:policy/aws-refarch-cross-account-pipeline-sts-and-cloudformation-policy  --policy-document file://Permissions-accounts-set-up/tools-admin-user-policy.json --profile developer1  --set-as-default
+```
+
+- update pulumi stack with debug output 
+```sh
+TF_TRACE=DEBUG pulumi up --yes -v=9 --logtostderr
 ```
